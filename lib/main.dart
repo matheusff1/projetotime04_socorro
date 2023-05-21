@@ -19,15 +19,32 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const TelaEmergencia());
+  runApp(const MyApp());
 }
 
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'SOS DENTAL',
+      theme: ThemeData(
+        primarySwatch: Colors.teal,
+      ),
+      home: const TelaEmergencia(),
+    );
+  }
+}
 
 
 class TelaEmergencia extends StatefulWidget {
   const TelaEmergencia({
     super.key,
   });
+
+
 
   @override
   TelaEmergenciaState createState() {
@@ -36,10 +53,6 @@ class TelaEmergencia extends StatefulWidget {
 }
 
 class TelaEmergenciaState extends State<TelaEmergencia> {
-
-  //controller camera
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
 
   XFile? filePhoto;
 
@@ -68,14 +81,13 @@ class TelaEmergenciaState extends State<TelaEmergencia> {
   Future<void> uploadPhoto(String path, String numero) async{
     File file = File(path);
     try{
-      String ref = 'fotosemergencia/foto-${numero}.jpg';
+      String ref = 'imagenspaciente/foto-${numero}.jpg';
       await storage.ref(ref).putFile(file);
     }on FirebaseException catch(e) {
       throw Exception('Erro no upload: ${e}');
     }
 
   }
-
 
    Future<XFile?> tirarFoto() async{
     final ImagePicker _picker = ImagePicker();
@@ -87,7 +99,6 @@ class TelaEmergenciaState extends State<TelaEmergencia> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      child: Form(
       key: _formKey,
       child:  Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -132,6 +143,9 @@ class TelaEmergenciaState extends State<TelaEmergencia> {
                 );
               }
               },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal
+              ),
               icon: const Icon (Icons.camera_alt_outlined),
               label: const Padding(
                 padding: EdgeInsets.all(12.0),
@@ -146,11 +160,16 @@ class TelaEmergenciaState extends State<TelaEmergencia> {
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
               onPressed: () {
-                if (_formKey.currentState!.validate() && filePhoto!=null) {
+                if (_formKey.currentState!.validate()) {
                   chamarEmergencia(controllerNome.text, controllerNum.text);
                   uploadPhoto(filePhoto!.path, controllerNum.text);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Gravando dados no Firestore...')),
+                  );
+                }
+                else{
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('ERRO: PREENCHA OS DADOS')),
                   );
                 }
               },
@@ -163,9 +182,6 @@ class TelaEmergenciaState extends State<TelaEmergencia> {
 
         ],
       ),
-
-
-    )
     );
 
 
