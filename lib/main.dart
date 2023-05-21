@@ -15,120 +15,40 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-// Obtain a list of the available cameras on the device.
-  final cameras = await availableCameras();
-
-// Get a specific camera from the list of available cameras.
-  final firstCamera = cameras.first;
-
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp( TelaEmergencia(camera: firstCamera));
+  runApp(const TelaEmergencia());
 }
 
 
-
-class TelaInicial extends StatefulWidget {
-  const TelaInicial({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<TelaInicial> createState() => _TelaInicialState();
-}
-
-class _TelaInicialState extends State<TelaInicial> {
-
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: AppBar(
-
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-
-
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
-}
 
 class TelaEmergencia extends StatefulWidget {
   const TelaEmergencia({
     super.key,
-    required this.camera
   });
 
-  final CameraDescription camera;
-
   @override
-
   TelaEmergenciaState createState() {
     return TelaEmergenciaState();
   }
 }
 
 class TelaEmergenciaState extends State<TelaEmergencia> {
-  final FirebaseStorage storage = FirebaseStorage.instance;
 
   //controller camera
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
 
+  XFile? filePhoto;
+
   // controler para observar o TextFormField
   final controllerNome = TextEditingController();
   final controllerNum = TextEditingController();
 
-  String endPhoto = "";
 
-
-  late File fotoTirada;
+  final FirebaseStorage storage = FirebaseStorage.instance;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -145,30 +65,24 @@ class TelaEmergenciaState extends State<TelaEmergencia> {
         .catchError((error) => print("Erro ao adicionar: $error"));
   }
 
-  PickedFile? _image;
-  File? imageFile;
-
-   tirarFoto(bool camera) async{
-     var temp;
-     PickedFile? photoSelected;
-    if(camera){
-      _image = await ImagePicker.platform.pickImage(source: ImageSource.camera);
-    } else{
-      _image = await ImagePicker.platform.pickImage(source: ImageSource.gallery);
+  Future<void> uploadPhoto(String path, String numero) async{
+    File file = File(path);
+    try{
+      String ref = 'fotosemergencia/foto-${numero}.jpg';
+      await storage.ref(ref).putFile(file);
+    }on FirebaseException catch(e) {
+      throw Exception('Erro no upload: ${e}');
     }
-     setState(() {
-       photoSelected = _image;
-       imageFile = File(photoSelected!.path);
-     });
+
   }
 
-  Future<void> uploadFoto(File image, String fileName) async{
-     try{
-       await FirebaseStorage.instance.ref("fotosemergencia/$fileName").putFile(image);
-     } on FirebaseException catch(e){
-       print('Erro ao realizar o upload: $e');
-     }
+
+   Future<XFile?> tirarFoto() async{
+    final ImagePicker _picker = ImagePicker();
+    XFile? image = await _picker.pickImage(source: ImageSource.camera);
+    return image;
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +125,7 @@ class TelaEmergenciaState extends State<TelaEmergencia> {
             child:ElevatedButton.icon(
               onPressed: () async {
               try {
-              tirarFoto(true);
+              filePhoto = await tirarFoto();
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Erro')),
@@ -232,9 +146,9 @@ class TelaEmergenciaState extends State<TelaEmergencia> {
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
               onPressed: () {
-                if (_formKey.currentState!.validate()) {
+                if (_formKey.currentState!.validate() && filePhoto!=null) {
                   chamarEmergencia(controllerNome.text, controllerNum.text);
-                  uploadFoto(imageFile!, controllerNum.text);
+                  uploadPhoto(filePhoto!.path, controllerNum.text);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Gravando dados no Firestore...')),
                   );
