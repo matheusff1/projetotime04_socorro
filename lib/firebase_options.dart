@@ -17,15 +17,24 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for ios - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -43,41 +52,12 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCDOIH8N1EMVjrAJePlm2ll2ntovVfkgfM',
-    appId: '1:56010970512:web:ea429c935e997da9550f15',
-    messagingSenderId: '56010970512',
-    projectId: 'projetotime4',
-    authDomain: 'projetotime4.firebaseapp.com',
-    storageBucket: 'projetotime4.appspot.com',
-    measurementId: 'G-JKGV4RVDZB',
-  );
-
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAvpCd8k30v-dy9hhNiuywCpqcr7IEsMdM',
-    appId: '1:56010970512:android:5e8f38bbc836846d550f15',
-    messagingSenderId: '56010970512',
-    projectId: 'projetotime4',
-    storageBucket: 'projetotime4.appspot.com',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAcVilpGEdD6V2ZQTKnhM3FUmED1fmuiHg',
-    appId: '1:56010970512:ios:d81df667dba84236550f15',
-    messagingSenderId: '56010970512',
-    projectId: 'projetotime4',
-    storageBucket: 'projetotime4.appspot.com',
-    iosClientId: '56010970512-2g66vbbll5h38h9j22i6158r1jo8edto.apps.googleusercontent.com',
-    iosBundleId: 'com.example.projetotime04Flutter',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAcVilpGEdD6V2ZQTKnhM3FUmED1fmuiHg',
-    appId: '1:56010970512:ios:d81df667dba84236550f15',
-    messagingSenderId: '56010970512',
-    projectId: 'projetotime4',
-    storageBucket: 'projetotime4.appspot.com',
-    iosClientId: '56010970512-2g66vbbll5h38h9j22i6158r1jo8edto.apps.googleusercontent.com',
-    iosBundleId: 'com.example.projetotime04Flutter',
+    apiKey: 'AIzaSyBBRFHgOGvJSs6xK1yTOkGqVzUzI54U9E0',
+    appId: '1:338865397877:android:f94c12cc5629f3ca8d983c',
+    messagingSenderId: '338865397877',
+    projectId: 'projecto-fire1',
+    databaseURL: 'https://projecto-fire1-default-rtdb.firebaseio.com',
+    storageBucket: 'projecto-fire1.appspot.com',
   );
 }
